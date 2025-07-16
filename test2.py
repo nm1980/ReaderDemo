@@ -1,9 +1,12 @@
+import os
+
 from docx import Document
 import sys
 sys.path.insert(0, "./docx")
 import docx
 import re
 import string
+from PyPDF2 import PdfReader
 selected_file=""
 best_match=""
 #Dictonary of jobs with experience, skills, and education key words to look out for when going through the resume
@@ -188,7 +191,16 @@ job_lists = {
         ]
     }
 }
-#extracts the text within the resume entered
+
+# Extracts the text from resumes with pdf file extension
+def read_pdf(pdf_path):
+    reader = PdfReader(pdf_path)
+    text = ""
+    for page in reader.pages:
+        text += page.extract_text()
+    return text
+
+# extracts the text from resumes with docx file extension
 def read_docx(file_path):
     doc = docx.Document(file_path)
     full_text = []
@@ -197,6 +209,15 @@ def read_docx(file_path):
         full_text.append(para.text)
 
     return '\n'.join(full_text)
+
+def check_file_type(filename):
+    root, extension = os.path.splitext(filename)
+    words=""
+    if extension == ".pdf":
+        words = read_pdf(filename)
+    else:
+        words = read_docx(filename)
+    return words
 
 #cleans up the text from the resume by converting all letters to lowercase and removing numbers
 def clean_text(text):
@@ -232,7 +253,7 @@ def get_matched_keywords(flat_resume_text, job_requirements):
 def main():
     global best_match
     path = str(selected_file)
-    raw_resume = read_docx(path)
+    raw_resume = check_file_type(path)
     clean_resume = clean_text(raw_resume).lower()  # lowercase once for easier matching
 
     match_results = []

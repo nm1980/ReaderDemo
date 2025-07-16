@@ -47,11 +47,15 @@ class DocxBrowser:
         try:
             files = os.listdir(self.current_dir)
             docx_files = [f for f in files if f.lower().endswith('.docx')]
-            if not docx_files:
-                self.listbox.insert(END, "No .docx files found.")
+            pdf_files = [f for f in files if f.lower().endswith('.pdf')]
+            if not docx_files and not pdf_files:
+                    self.listbox.insert(END, "No compatible files found.")
             else:
                 for file in docx_files:
                     self.listbox.insert(END, file)
+                for file in pdf_files:
+                    self.listbox.insert(END, file)
+
         except Exception as e:
             self.listbox.insert(END, f"Error: {e}")
 
